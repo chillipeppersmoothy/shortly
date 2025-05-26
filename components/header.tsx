@@ -1,10 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { LinkIcon } from "lucide-react";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -52,11 +58,18 @@ export function Header() {
             API
           </Button>
           <ModeToggle />
-          <Button asChild variant="outline">
-            <Link href="#">Sign In</Link>
-          </Button>
+          <SignedOut>
+            <Button asChild variant="outline" id="trigger-sign-in">
+              <SignInButton />
+            </Button>
+            <Button asChild>
+              <SignUpButton />
+            </Button>
+          </SignedOut>
           <Button asChild>
-            <Link href="#">Sign Up</Link>
+            <SignedIn>
+              <UserButton showName />
+            </SignedIn>
           </Button>
         </div>
       </div>

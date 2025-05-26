@@ -43,7 +43,6 @@ export function StatsCard() {
 
   useEffect(() => {
     setTotalUrls(userData.length);
-
     const clicks = userData.reduce((total, url) => total + url.clicks, 0);
     setTotalClicks(clicks);
     setConversionRate(userData.length > 0 ? clicks / userData.length : 0);

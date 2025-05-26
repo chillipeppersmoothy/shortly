@@ -1,6 +1,5 @@
 import { ShortenedURL, ShortURLResponse } from "../interface/types";
-
-const API_URL = "https://smally-psi.vercel.app";
+import { API_URL } from "@/lib/env";
 
 export async function postUrl(record: ShortenedURL): Promise<ShortURLResponse> {
   const response = await fetch(API_URL, {
@@ -8,7 +7,7 @@ export async function postUrl(record: ShortenedURL): Promise<ShortURLResponse> {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ ...record, user: "aditya" }),
+    body: JSON.stringify(record),
   });
 
   const data = await response.json();

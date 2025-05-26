@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -36,7 +37,8 @@ import { format } from "date-fns";
 import { ShortenedURL } from "../interface/types";
 import { useDataContext } from "../providers/ContextProvider";
 import { deleteUrl, patchUrl } from "../api/services";
-const API_URL = "https://smally-psi.vercel.app/";
+import { useUser } from "@clerk/nextjs";
+import { API_URL } from "@/lib/env";
 
 export function UrlList() {
   const { userData, getUserData, incrementClicks, deleteData } =
@@ -49,14 +51,23 @@ export function UrlList() {
   const [urlToDelete, setUrlToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    getUserData("aditya");
-  }, [refreshFlag]);
+    getUser();
+  }, [refreshFlag, user, isLoaded]);
 
   useEffect(() => {
     setUrls(userData);
   }, [userData]);
+
+  async function getUser() {
+    if (!isLoaded) return;
+
+    if (user && user.username) {
+      await getUserData(user?.username);
+    }
+  }
 
   const handleOpenUrl = (url: ShortenedURL) => {
     patchUrl(url.slug, url.clicks + 1);

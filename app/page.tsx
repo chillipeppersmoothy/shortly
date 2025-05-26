@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/hero-section";
 import { UrlShortenerForm } from "@/components/url-shortener-form";
 import { UrlList } from "@/components/url-list";

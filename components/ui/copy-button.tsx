@@ -4,7 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-const API_URL = "https://smally-psi.vercel.app/";
+import { API_URL } from "@/lib/env";
 
 interface CopyButtonProps {
   value: string;

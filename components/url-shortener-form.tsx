@@ -21,9 +21,12 @@ import { format } from "date-fns";
 import { postUrl } from "../api/services";
 import { useDataContext } from "../providers/ContextProvider";
 import { ShortenedURL } from "../interface/types";
+import { API_URL } from "@/lib/env";
+import { useUser } from "@clerk/nextjs";
 
 export function UrlShortenerForm() {
   const [url, setUrl] = useState("");
+  const [currentUser, setCurrentUser] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   const [isCustomSlug, setIsCustomSlug] = useState(false);
   const [isQrCode, setIsQrCode] = useState(false);
@@ -32,7 +35,7 @@ export function UrlShortenerForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [slugError, setSlugError] = useState("");
-
+  const { user, isSignedIn } = useUser();
   const { toast } = useToast();
   const { updateUserData } = useDataContext();
 
@@ -44,6 +47,12 @@ export function UrlShortenerForm() {
       return false;
     }
   };
+
+  useEffect(() => {
+    if (user && user.username) {
+      setCurrentUser(user.username);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (isCustomSlug || isExpiration) {
@@ -107,6 +116,11 @@ export function UrlShortenerForm() {
       return;
     }
 
+    if (!isSignedIn) {
+      document.getElementById("trigger-sign-in")?.click();
+      return;
+    }
+
     setError("");
     setSlugError("");
     setIsSubmitting(true);
@@ -114,6 +128,7 @@ export function UrlShortenerForm() {
     try {
       const urlData: ShortenedURL = await shortenUrl(
         url,
+        currentUser,
         isQrCode,
         customSlug,
         expirationDate
@@ -221,7 +236,7 @@ export function UrlShortenerForm() {
                     onChange={(e) => setCustomSlug(e.target.value)}
                   />
                   <div className="text-xs text-muted-foreground mt-3">
-                    Your URL will be: https://smally-psi.vercel.app/
+                    Your URL will be: `${API_URL}`
                     {customSlug || "your-custom-slug"}
                   </div>
                   {slugError && (
