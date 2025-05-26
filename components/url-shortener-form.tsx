@@ -1,73 +1,124 @@
-'use client'
+"use client";
 
-import { FormEvent, useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Switch } from '@/components/ui/switch'
-import { CalendarIcon, LinkIcon, QrCodeIcon, Wand2Icon } from 'lucide-react'
-import { shortenUrl } from '@/lib/mock-data'
-import { cn } from '@/lib/utils'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
-import { format } from 'date-fns'
+import { FormEvent, useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { CalendarIcon, LinkIcon, QrCodeIcon, Wand2Icon } from "lucide-react";
+import { shortenUrl } from "@/lib/data";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { postUrl } from "../api/services";
+import { useDataContext } from "../providers/ContextProvider";
+import { ShortenedURL } from "../interface/types";
 
 interface UrlShortenerFormProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
-  const [url, setUrl] = useState('')
-  const [customSlug, setCustomSlug] = useState('')
-  const [isCustomSlug, setIsCustomSlug] = useState(false)
-  const [isQrCode, setIsQrCode] = useState(false)
-  const [isExpiration, setIsExpiration] = useState(false)
-  const [expirationDate, setExpirationDate] = useState<Date>()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [url, setUrl] = useState("");
+  const [customSlug, setCustomSlug] = useState("");
+  const [isCustomSlug, setIsCustomSlug] = useState(false);
+  const [isQrCode, setIsQrCode] = useState(false);
+  const [isExpiration, setIsExpiration] = useState(false);
+  const [expirationDate, setExpirationDate] = useState<Date>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [slugError, setSlugError] = useState("");
+
+  const { updateUserData } = useDataContext();
 
   const isValidUrl = (urlString: string) => {
     try {
-      new URL(urlString)
-      return true
+      new URL(urlString);
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
-  }
+  };
+
+  useEffect(() => {
+    if (isCustomSlug || isExpiration) {
+      setError("");
+      setSlugError("");
+      return;
+    }
+    setSlugError("");
+  }, [isCustomSlug, isExpiration, customSlug, expirationDate]);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!url) {
-      setError('Please enter a URL')
-      return
+      setError("Please enter a URL");
+      return;
     }
-    
+
     if (!isValidUrl(url)) {
-      setError('Please enter a valid URL')
-      return
+      setError("Please enter a valid URL");
+      return;
     }
-    
-    setError('')
-    setIsSubmitting(true)
-    
+
+    if (isCustomSlug && !customSlug.length) {
+      setSlugError("Please enter a valid slug");
+      return;
+    }
+
+    if (isCustomSlug && customSlug.length > 8) {
+      setSlugError("Slug should be 8 characters or less");
+      return;
+    }
+
+    if (isExpiration && !expirationDate) {
+      setSlugError("Please select an expiration date");
+      return;
+    }
+
+    setError("");
+    setSlugError("");
+    setIsSubmitting(true);
+
     try {
-      await shortenUrl(url, isCustomSlug ? customSlug : undefined)
-      setUrl('')
-      setCustomSlug('')
-      if (onSuccess) onSuccess()
+      const urlData: ShortenedURL = await shortenUrl(
+        url,
+        isQrCode,
+        customSlug,
+        expirationDate
+      );
+      const response = await postUrl(urlData);
+
+      updateUserData({ ...urlData, slug: response.slug, qrCode: response.qr });
+
+      setUrl("");
+      setCustomSlug("");
+      setIsCustomSlug(false);
+      setIsQrCode(false);
+      setIsExpiration(false);
+      setExpirationDate(undefined);
+      setError("");
+      setSlugError("");
+
+      if (onSuccess) onSuccess();
     } catch (err) {
-      setError('Something went wrong. Please try again.')
-      console.error(err)
+      setError("Something went wrong. Please try again.");
+      console.error(err);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto backdrop-blur-sm bg-card/95">
+    <Card className="w-full max-w-3xl mx-auto backdrop-blur-sm bg-card/95 mt-24">
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -76,7 +127,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
               Paste your long URL below to create a short link
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -90,8 +141,9 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                 onChange={(e) => setUrl(e.target.value)}
               />
             </div>
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="min-w-[100px] transition-all duration-300"
               disabled={isSubmitting}
             >
@@ -105,18 +157,16 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
               )}
             </Button>
           </div>
-          
-          {error && (
-            <div className="text-destructive text-sm">{error}</div>
-          )}
-          
+
+          {error && <div className="text-destructive text-sm">{error}</div>}
+
           <Tabs defaultValue="options" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="options">Options</TabsTrigger>
               <TabsTrigger value="customization">Customization</TabsTrigger>
               <TabsTrigger value="advanced">Advanced</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="options" className="space-y-3 pt-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -131,27 +181,34 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                   onCheckedChange={setIsCustomSlug}
                 />
               </div>
-              
+
               {isCustomSlug && (
                 <div className="pt-2">
                   <Input
-                    placeholder="your-custom-slug"
+                    placeholder="your-custom-slug (Max 8 characters)"
                     value={customSlug}
                     onChange={(e) => setCustomSlug(e.target.value)}
                   />
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Your URL will be: https://short.fy/{customSlug || 'your-custom-slug'}
+                  <div className="text-xs text-muted-foreground mt-3">
+                    Your URL will be: https://smally-psi.vercel.app/
+                    {customSlug || "your-custom-slug"}
                   </div>
+                  {slugError && (
+                    <div className="text-destructive text-sm">{slugError}</div>
+                  )}
                 </div>
               )}
             </TabsContent>
-            
+
             <TabsContent value="customization" className="space-y-3 pt-3">
               <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="qr-code">QR code</Label>
-                  <div className="text-sm text-muted-foreground">
-                    Generate a QR code for your short link
+                <div className="space-y-0.5 flex justify-center items-center">
+                  <QrCodeIcon className="h-10 w-10" />
+                  <div className="pl-2 flex-column">
+                    <Label htmlFor="qr-code">QR code</Label>
+                    <div className="text-sm text-muted-foreground">
+                      Generate a QR code for your short link
+                    </div>
                   </div>
                 </div>
                 <Switch
@@ -161,7 +218,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                 />
               </div>
             </TabsContent>
-            
+
             <TabsContent value="advanced" className="space-y-3 pt-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -176,7 +233,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                   onCheckedChange={setIsExpiration}
                 />
               </div>
-              
+
               {isExpiration && (
                 <div className="pt-2">
                   <Popover>
@@ -189,7 +246,9 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {expirationDate ? format(expirationDate, "PPP") : "Select expiration date"}
+                        {expirationDate
+                          ? format(expirationDate, "PPP")
+                          : "Select expiration date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -202,6 +261,9 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                       />
                     </PopoverContent>
                   </Popover>
+                  {slugError && (
+                    <div className="text-destructive text-sm">{slugError}</div>
+                  )}
                 </div>
               )}
             </TabsContent>
@@ -209,5 +271,5 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

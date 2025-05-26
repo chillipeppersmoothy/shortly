@@ -1,49 +1,53 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getHistory } from '@/lib/mock-data'
-import { 
-  BarChart3, 
-  Link2, 
-  MousePointerClick, 
-  TrendingUp 
-} from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3, Link2, MousePointerClick, TrendingUp } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useDataContext } from "../providers/ContextProvider";
 
-// Mock data for the chart
 const generateChartData = () => {
-  const data = []
-  const now = new Date()
-  
+  const data = [];
+  const now = new Date();
+
   for (let i = 6; i >= 0; i--) {
-    const date = new Date(now)
-    date.setDate(now.getDate() - i)
-    
+    const date = new Date(now);
+    date.setDate(now.getDate() - i);
+
     data.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      clicks: Math.floor(Math.random() * 25) + 5
-    })
+      date: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      clicks: Math.floor(Math.random() * 25) + 5,
+    });
   }
-  
-  return data
-}
+
+  return data;
+};
 
 export function StatsCard() {
-  const [totalUrls, setTotalUrls] = useState(0)
-  const [totalClicks, setTotalClicks] = useState(0)
-  const [conversionRate, setConversionRate] = useState(0)
-  const [chartData, setChartData] = useState(generateChartData())
-  
+  const [totalUrls, setTotalUrls] = useState(0);
+  const [totalClicks, setTotalClicks] = useState(0);
+  const [conversionRate, setConversionRate] = useState(0);
+  const [chartData, setChartData] = useState(generateChartData());
+  const { userData } = useDataContext();
+
   useEffect(() => {
-    const history = getHistory()
-    setTotalUrls(history.length)
-    
-    const clicks = history.reduce((total, url) => total + url.clicks, 0)
-    setTotalClicks(clicks)
-    
-    setConversionRate(history.length > 0 ? (clicks / history.length) : 0)
-  }, [])
+    setTotalUrls(userData.length);
+
+    const clicks = userData.reduce((total, url) => total + url.clicks, 0);
+    setTotalClicks(clicks);
+    setConversionRate(userData.length > 0 ? clicks / userData.length : 0);
+  }, []);
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8 overflow-hidden">
@@ -64,7 +68,7 @@ export function StatsCard() {
               <p className="text-2xl font-bold">{totalUrls}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="bg-chart-1/20 dark:bg-chart-1/10 p-2 rounded-full">
               <MousePointerClick className="h-5 w-5 text-chart-1" />
@@ -74,7 +78,7 @@ export function StatsCard() {
               <p className="text-2xl font-bold">{totalClicks}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="bg-chart-2/20 dark:bg-chart-2/10 p-2 rounded-full">
               <TrendingUp className="h-5 w-5 text-chart-2" />
@@ -85,7 +89,7 @@ export function StatsCard() {
             </div>
           </div>
         </div>
-        
+
         <div className="h-[200px] w-full mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -94,35 +98,43 @@ export function StatsCard() {
             >
               <defs>
                 <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--chart-1))"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--chart-1))"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-              <XAxis 
-                dataKey="date" 
-                className="text-xs text-muted-foreground"
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="stroke-muted/30"
               />
+              <XAxis dataKey="date" className="text-xs text-muted-foreground" />
               <YAxis className="text-xs text-muted-foreground" />
               <Tooltip
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  borderColor: 'hsl(var(--border))',
-                  borderRadius: '0.5rem'
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  borderColor: "hsl(var(--border))",
+                  borderRadius: "0.5rem",
                 }}
-                labelStyle={{ fontWeight: 'bold' }}
+                labelStyle={{ fontWeight: "bold" }}
               />
-              <Area 
-                type="monotone" 
-                dataKey="clicks" 
-                stroke="hsl(var(--chart-1))" 
-                fillOpacity={1} 
-                fill="url(#colorClicks)" 
+              <Area
+                type="monotone"
+                dataKey="clicks"
+                stroke="hsl(var(--chart-1))"
+                fillOpacity={1}
+                fill="url(#colorClicks)"
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

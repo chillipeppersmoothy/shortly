@@ -1,20 +1,21 @@
-import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { ThemeProvider } from '@/providers/ThemeProvider'
-import { Header } from '@/components/header'
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import { Header } from "@/components/header";
+import { DataProvider } from "../providers/ContextProvider";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Shortify - URL Shortener',
-  description: 'A modern URL shortener service with analytics',
-}
+  title: "Shortify - URL Shortener",
+  description: "A modern URL shortener service with analytics",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -25,12 +26,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main>
-            {children}
-          </main>
+          <DataProvider>
+            <Header />
+            <main>{children}</main>
+          </DataProvider>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

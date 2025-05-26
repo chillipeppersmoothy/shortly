@@ -1,79 +1,87 @@
-'use client'
+"use client";
 
-import { Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const tiers = [
   {
-    name: 'Free',
-    price: '$0',
-    description: 'Perfect for personal use and small projects',
+    name: "Free",
+    price: "$0",
+    description: "Perfect for personal use and small projects",
     features: [
-      'Up to 50 shortened URLs',
-      'Basic analytics',
-      'Standard short URLs',
-      '24-hour click tracking',
-      'Basic QR codes',
+      "Up to 50 shortened URLs",
+      "Basic analytics",
+      "Standard short URLs",
+      "24-hour click tracking",
+      "Basic QR codes",
     ],
-    cta: 'Get Started',
+    cta: "Get Started",
     popular: false,
   },
   {
-    name: 'Pro',
-    price: '$12',
-    period: '/month',
-    description: 'Ideal for professionals and growing businesses',
+    name: "Pro",
+    price: "$12",
+    period: "/month",
+    description: "Ideal for professionals and growing businesses",
     features: [
-      'Up to 1,000 shortened URLs',
-      'Advanced analytics',
-      'Custom branded domains',
-      '30-day click tracking',
-      'Custom QR codes',
-      'API access',
-      'Priority support',
+      "Up to 1,000 shortened URLs",
+      "Advanced analytics",
+      "Custom branded domains",
+      "30-day click tracking",
+      "Custom QR codes",
+      "API access",
+      "Priority support",
     ],
-    cta: 'Start Free Trial',
+    cta: "Start Free Trial",
     popular: true,
   },
   {
-    name: 'Enterprise',
-    price: '$49',
-    period: '/month',
-    description: 'For large organizations with custom needs',
+    name: "Enterprise",
+    price: "$49",
+    period: "/month",
+    description: "For large organizations with custom needs",
     features: [
-      'Unlimited shortened URLs',
-      'Enterprise analytics',
-      'Multiple branded domains',
-      'Unlimited click tracking',
-      'Advanced QR customization',
-      'Full API access',
-      'Dedicated support',
-      'SSO integration',
-      'Custom contracts',
+      "Unlimited shortened URLs",
+      "Enterprise analytics",
+      "Multiple branded domains",
+      "Unlimited click tracking",
+      "Advanced QR customization",
+      "Full API access",
+      "Dedicated support",
+      "SSO integration",
+      "Custom contracts",
     ],
-    cta: 'Contact Sales',
+    cta: "Contact Sales",
     popular: false,
   },
-]
+];
 
 export function PricingSection() {
   return (
-    <section className="py-24 bg-muted/50">
+    <section className="py-24 bg-muted/50" id="pricing">
       <div className="container px-4 mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
             Simple, transparent pricing
           </h2>
           <p className="text-lg text-muted-foreground">
-            Choose the perfect plan for your needs. Always know what you'll pay.
+            Choose the perfect plan for your needs. Always know what you&apos;ll
+            pay.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {tiers.map((tier) => (
-            <Card 
+            <Card
               key={tier.name}
               className={cn(
                 "relative flex flex-col",
@@ -87,12 +95,12 @@ export function PricingSection() {
                   </div>
                 </div>
               )}
-              
+
               <CardHeader>
                 <CardTitle className="text-xl">{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
               </CardHeader>
-              
+
               <CardContent className="flex-1">
                 <div className="mb-6">
                   <span className="text-4xl font-bold">{tier.price}</span>
@@ -100,7 +108,7 @@ export function PricingSection() {
                     <span className="text-muted-foreground">{tier.period}</span>
                   )}
                 </div>
-                
+
                 <ul className="space-y-3">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
@@ -110,10 +118,10 @@ export function PricingSection() {
                   ))}
                 </ul>
               </CardContent>
-              
+
               <CardFooter>
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   variant={tier.popular ? "default" : "outline"}
                 >
                   {tier.cta}
@@ -124,5 +132,5 @@ export function PricingSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

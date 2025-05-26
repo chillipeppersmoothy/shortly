@@ -1,21 +1,20 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ShortenedURL, getHistory, incrementClicks, deleteUrl } from '@/lib/mock-data'
-import { CopyButton } from '@/components/ui/copy-button'
-import { cn } from '@/lib/utils'
-import { 
-  BarChart, 
-  Clock, 
-  ExternalLink, 
-  QrCode, 
-  Share2, 
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
+import {
+  BarChart,
+  Clock,
+  ExternalLink,
+  QrCode,
+  Share2,
   Trash2,
-  BarChart3,
-  ArchiveIcon
-} from 'lucide-react'
+  ArchiveIcon,
+  ScanQrCodeIcon,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,58 +24,70 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { format } from 'date-fns'
+} from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+import { ShortenedURL } from "../interface/types";
+import { useDataContext } from "../providers/ContextProvider";
+import { deleteUrl, patchUrl } from "../api/services";
+const API_URL = "https://smally-psi.vercel.app/";
 
 export function UrlList() {
-  const [urls, setUrls] = useState<ShortenedURL[]>([])
-  const [refreshFlag, setRefreshFlag] = useState(0)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [urlToDelete, setUrlToDelete] = useState<string | null>(null)
-  
+  const { userData, getUserData, incrementClicks, deleteData } =
+    useDataContext();
+  const [urls, setUrls] = useState<ShortenedURL[]>([]);
+  const [refreshFlag, setRefreshFlag] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [urlToDelete, setUrlToDelete] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    setUrls(getHistory())
-  }, [refreshFlag])
-  
+    getUserData("aditya");
+    setUrls(userData);
+  }, [refreshFlag]);
+
   const handleOpenUrl = (url: ShortenedURL) => {
-    incrementClicks(url.id)
-    setRefreshFlag(prev => prev + 1)
-    window.open(url.originalUrl, '_blank')
-  }
-  
-  const handleCopyClick = (url: string) => {
-    navigator.clipboard.writeText(url)
-  }
-  
-  const handleDeleteClick = (id: string) => {
-    setUrlToDelete(id)
-    setDeleteDialogOpen(true)
-  }
-  
+    patchUrl(url.slug, url.clicks + 1);
+    incrementClicks(url.slug);
+    setRefreshFlag((prev) => prev + 1);
+    window.open(`${API_URL}/${url.slug}`, "_blank");
+  };
+
+  const handleDeleteClick = (slug: string) => {
+    setUrlToDelete(slug);
+    setDeleteDialogOpen(true);
+  };
+
   const confirmDelete = () => {
     if (urlToDelete) {
       deleteUrl(urlToDelete)
-      setRefreshFlag(prev => prev + 1)
-      setDeleteDialogOpen(false)
-      setUrlToDelete(null)
+        .then(() => {
+          deleteData(urlToDelete);
+          setRefreshFlag((prev) => prev + 1);
+          setDeleteDialogOpen(false);
+          setUrlToDelete(null);
+        })
+        .catch(() => {
+          setError("Failed to delete URL. Please try again.");
+        });
     }
-  }
+  };
 
   const handleShare = async (url: string) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Shortened URL',
-          text: 'Check out this shortened URL',
-          url
-        })
+          title: "Shortened URL",
+          text: "Check out this shortened URL",
+          url,
+        });
       } catch (err) {
-        console.log('Error sharing:', err)
+        console.log("Error sharing:", err);
       }
     } else {
-      navigator.clipboard.writeText(url)
+      navigator.clipboard.writeText(url);
     }
-  }
+  };
 
   if (urls.length === 0) {
     return (
@@ -89,52 +100,68 @@ export function UrlList() {
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-8 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">Your links</h2>
-        <Button variant="outline" size="sm" onClick={() => setRefreshFlag(prev => prev + 1)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setRefreshFlag((prev) => prev + 1)}
+        >
           Refresh
         </Button>
       </div>
-      
+
       {urls.map((url) => (
-        <Card key={url.id} className="overflow-hidden bg-card/95 border transition-all duration-200 hover:shadow-md">
+        <Card
+          key={url.slug}
+          className="overflow-hidden bg-card/95 border transition-all duration-200 hover:shadow-md"
+        >
           <CardContent className="p-4">
+            {url.qrCode && (
+              <Image
+                src={url.qrCode}
+                alt="QR Code"
+                width={48}
+                height={48}
+                className="rounded-md mr-4"
+              />
+            )}
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
               <div>
                 <div className="flex flex-col mb-2">
                   <div className="flex items-center text-primary font-medium mb-1 text-lg">
-                    {url.shortUrl}
-                    <CopyButton value={url.shortUrl} className="ml-2" />
+                    {url.slug}
+                    <CopyButton value={url.slug} className="ml-2" />
                   </div>
                   <div className="text-sm text-muted-foreground mb-2 truncate">
-                    <span 
-                      className="hover:underline cursor-pointer" 
+                    <span
+                      className="hover:underline cursor-pointer"
                       onClick={() => handleOpenUrl(url)}
-                      title={url.originalUrl}
+                      title={url.slug}
                     >
-                      {url.originalUrl}
+                      {url.url}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                   <div className="flex items-center">
                     <Clock className="h-3 w-3 mr-1" />
-                    {format(url.createdAt, 'PPp')}
+                    {format(url.createdAt, "PPp")}
                   </div>
                   <div className="flex items-center">
                     <BarChart className="h-3 w-3 mr-1" />
-                    {url.clicks} {url.clicks === 1 ? 'click' : 'clicks'}
+                    {url.clicks} {url.clicks === 1 ? "click" : "clicks"}
                   </div>
                   {url.expiresAt && (
                     <div className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      Expires: {format(url.expiresAt, 'PP')}
+                      Expires: {format(url.expiresAt, "PP")}
                     </div>
                   )}
                   {url.qrCode && (
@@ -145,31 +172,42 @@ export function UrlList() {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8" 
-                  onClick={() => handleShare(url.shortUrl)}
+                {url.hasQrCode && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleOpenUrl(url)}
+                  >
+                    <ScanQrCodeIcon className="h-4 w-4" />
+                    <span className="sr-only">Open URL</span>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => handleShare(url.slug)}
                 >
                   <Share2 className="h-4 w-4" />
                   <span className="sr-only">Share</span>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8" 
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
                   onClick={() => handleOpenUrl(url)}
                 >
                   <ExternalLink className="h-4 w-4" />
                   <span className="sr-only">Open</span>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8" 
-                  onClick={() => handleDeleteClick(url.id)}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => handleDeleteClick(url.slug)}
                 >
                   <Trash2 className="h-4 w-4" />
                   <span className="sr-only">Delete</span>
@@ -177,23 +215,27 @@ export function UrlList() {
               </div>
             </div>
           </CardContent>
+          {error && <div className="p-4 text-red-500 text-sm">{error}</div>}
         </Card>
       ))}
-      
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this shortened URL. This action cannot be undone.
+              This will permanently delete this shortened URL. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

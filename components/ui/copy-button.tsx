@@ -1,30 +1,41 @@
-'use client'
+"use client";
 
-import { Check, Copy } from 'lucide-react'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+const API_URL = "https://smally-psi.vercel.app/";
 
 interface CopyButtonProps {
-  value: string
-  className?: string
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive'
+  value: string;
+  className?: string;
+  variant?:
+    | "default"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "link"
+    | "destructive";
 }
 
-export function CopyButton({ value, className, variant = 'outline' }: CopyButtonProps) {
-  const [hasCopied, setHasCopied] = useState(false)
+export function CopyButton({
+  value,
+  className,
+  variant = "outline",
+}: CopyButtonProps) {
+  const [hasCopied, setHasCopied] = useState(false);
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(value)
-    setHasCopied(true)
-    setTimeout(() => setHasCopied(false), 2000)
-  }
+    await navigator.clipboard.writeText(API_URL + value);
+    setHasCopied(true);
+    setTimeout(() => setHasCopied(false), 2000);
+  };
 
   return (
     <Button
       size="sm"
       variant={variant}
-      className={cn('transition-all duration-200', className)}
+      className={cn("transition-all duration-200", className)}
       onClick={copyToClipboard}
     >
       {hasCopied ? (
@@ -39,5 +50,5 @@ export function CopyButton({ value, className, variant = 'outline' }: CopyButton
         </>
       )}
     </Button>
-  )
+  );
 }
