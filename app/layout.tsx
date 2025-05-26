@@ -8,7 +8,7 @@ import { DataProvider } from "../providers/ContextProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Shortify - URL Shortener",
+  title: "Smal.ly - URL Shortener",
   description: "A modern URL shortener service with analytics",
 };
 

@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { CalendarIcon, LinkIcon, QrCodeIcon, Wand2Icon } from "lucide-react";
 import { shortenUrl } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import {
   Popover,
   PopoverContent,
@@ -21,11 +22,7 @@ import { postUrl } from "../api/services";
 import { useDataContext } from "../providers/ContextProvider";
 import { ShortenedURL } from "../interface/types";
 
-interface UrlShortenerFormProps {
-  onSuccess?: () => void;
-}
-
-export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
+export function UrlShortenerForm() {
   const [url, setUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   const [isCustomSlug, setIsCustomSlug] = useState(false);
@@ -36,6 +33,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
   const [error, setError] = useState("");
   const [slugError, setSlugError] = useState("");
 
+  const { toast } = useToast();
   const { updateUserData } = useDataContext();
 
   const isValidUrl = (urlString: string) => {
@@ -61,26 +59,51 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
 
     if (!url) {
       setError("Please enter a URL");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a URL",
+      });
       return;
     }
 
     if (!isValidUrl(url)) {
       setError("Please enter a valid URL");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a valid URL",
+      });
       return;
     }
 
     if (isCustomSlug && !customSlug.length) {
       setSlugError("Please enter a valid slug");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a valid slug",
+      });
       return;
     }
 
     if (isCustomSlug && customSlug.length > 8) {
       setSlugError("Slug should be 8 characters or less");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Slug should be 8 characters or less",
+      });
       return;
     }
 
     if (isExpiration && !expirationDate) {
       setSlugError("Please select an expiration date");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select an expiration date",
+      });
       return;
     }
 
@@ -99,6 +122,11 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
 
       updateUserData({ ...urlData, slug: response.slug, qrCode: response.qr });
 
+      toast({
+        title: "Success",
+        description: "URL shortened successfully!",
+      });
+
       setUrl("");
       setCustomSlug("");
       setIsCustomSlug(false);
@@ -107,10 +135,13 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
       setExpirationDate(undefined);
       setError("");
       setSlugError("");
-
-      if (onSuccess) onSuccess();
     } catch (err) {
       setError("Something went wrong. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to shorten URL. Please try again.",
+      });
       console.error(err);
     } finally {
       setIsSubmitting(false);

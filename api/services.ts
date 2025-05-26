@@ -8,7 +8,7 @@ export async function postUrl(record: ShortenedURL): Promise<ShortURLResponse> {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(record),
+    body: JSON.stringify({ ...record, user: "aditya" }),
   });
 
   const data = await response.json();

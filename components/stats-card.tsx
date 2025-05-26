@@ -47,7 +47,7 @@ export function StatsCard() {
     const clicks = userData.reduce((total, url) => total + url.clicks, 0);
     setTotalClicks(clicks);
     setConversionRate(userData.length > 0 ? clicks / userData.length : 0);
-  }, []);
+  }, [userData]);
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8 overflow-hidden">

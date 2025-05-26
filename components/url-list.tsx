@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
+import { useToast } from "@/hooks/use-toast";
 import {
   BarChart,
   Clock,
@@ -25,6 +26,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { ShortenedURL } from "../interface/types";
 import { useDataContext } from "../providers/ContextProvider";
@@ -38,24 +45,38 @@ export function UrlList() {
   const [refreshFlag, setRefreshFlag] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [selectedQrCode, setSelectedQrCode] = useState<string | null>(null);
   const [urlToDelete, setUrlToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     getUserData("aditya");
-    setUrls(userData);
   }, [refreshFlag]);
+
+  useEffect(() => {
+    setUrls(userData);
+  }, [userData]);
 
   const handleOpenUrl = (url: ShortenedURL) => {
     patchUrl(url.slug, url.clicks + 1);
     incrementClicks(url.slug);
     setRefreshFlag((prev) => prev + 1);
     window.open(`${API_URL}/${url.slug}`, "_blank");
+    toast({
+      title: "Success",
+      description: "Opening URL in new tab",
+    });
   };
 
   const handleDeleteClick = (slug: string) => {
     setUrlToDelete(slug);
     setDeleteDialogOpen(true);
+  };
+
+  const handleQrCodeClick = (qrCode: string) => {
+    setSelectedQrCode(qrCode);
+    setQrDialogOpen(true);
   };
 
   const confirmDelete = () => {
@@ -66,9 +87,18 @@ export function UrlList() {
           setRefreshFlag((prev) => prev + 1);
           setDeleteDialogOpen(false);
           setUrlToDelete(null);
+          toast({
+            title: "Success",
+            description: "URL deleted successfully",
+          });
         })
         .catch(() => {
           setError("Failed to delete URL. Please try again.");
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to delete URL. Please try again.",
+          });
         });
     }
   };
@@ -81,11 +111,24 @@ export function UrlList() {
           text: "Check out this shortened URL",
           url,
         });
+        toast({
+          title: "Success",
+          description: "URL shared successfully",
+        });
       } catch (err) {
         console.log("Error sharing:", err);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to share URL",
+        });
       }
     } else {
       navigator.clipboard.writeText(url);
+      toast({
+        title: "Success",
+        description: "URL copied to clipboard",
+      });
     }
   };
 
@@ -122,15 +165,6 @@ export function UrlList() {
           className="overflow-hidden bg-card/95 border transition-all duration-200 hover:shadow-md"
         >
           <CardContent className="p-4">
-            {url.qrCode && (
-              <Image
-                src={url.qrCode}
-                alt="QR Code"
-                width={48}
-                height={48}
-                className="rounded-md mr-4"
-              />
-            )}
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
               <div>
                 <div className="flex flex-col mb-2">
@@ -152,7 +186,7 @@ export function UrlList() {
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                   <div className="flex items-center">
                     <Clock className="h-3 w-3 mr-1" />
-                    {format(url.createdAt, "PPp")}
+                    {format(new Date(url.createdAt), "PPp")}
                   </div>
                   <div className="flex items-center">
                     <BarChart className="h-3 w-3 mr-1" />
@@ -161,7 +195,7 @@ export function UrlList() {
                   {url.expiresAt && (
                     <div className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      Expires: {format(url.expiresAt, "PP")}
+                      Expires: {format(new Date(url.expiresAt), "PP")}
                     </div>
                   )}
                   {url.qrCode && (
@@ -179,10 +213,10 @@ export function UrlList() {
                     variant="outline"
                     size="icon"
                     className="h-8 w-8"
-                    onClick={() => handleOpenUrl(url)}
+                    onClick={() => handleQrCodeClick(url.qrCode!)}
                   >
                     <ScanQrCodeIcon className="h-4 w-4" />
-                    <span className="sr-only">Open URL</span>
+                    <span className="sr-only">Show QR Code</span>
                   </Button>
                 )}
                 <Button
@@ -236,6 +270,26 @@ export function UrlList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>QR Code</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center p-6">
+            {selectedQrCode && (
+              <div className="relative w-64 h-64">
+                <Image
+                  src={selectedQrCode}
+                  alt="QR Code"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
