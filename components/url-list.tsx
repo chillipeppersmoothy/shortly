@@ -50,6 +50,9 @@ export function UrlList() {
   const [selectedQrCode, setSelectedQrCode] = useState<string | null>(null);
   const [urlToDelete, setUrlToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [formattedDates, setFormattedDates] = useState<
+    Record<string, { created: string; expires: string }>
+  >({});
   const { toast } = useToast();
   const { user, isLoaded } = useUser();
 
@@ -59,6 +62,15 @@ export function UrlList() {
 
   useEffect(() => {
     setUrls(userData);
+
+    const dates: Record<string, { created: string; expires: string }> = {};
+    userData.forEach((url) => {
+      dates[url.slug] = {
+        created: format(new Date(url.createdAt), "PPp"),
+        expires: url.expiresAt ? format(new Date(url.expiresAt), "PP") : "",
+      };
+    });
+    setFormattedDates(dates);
   }, [userData]);
 
   async function getUser() {
@@ -197,16 +209,16 @@ export function UrlList() {
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                   <div className="flex items-center">
                     <Clock className="h-3 w-3 mr-1" />
-                    {format(new Date(url.createdAt), "PPp")}
+                    {formattedDates[url.slug]?.created || ""}
                   </div>
                   <div className="flex items-center">
                     <BarChart className="h-3 w-3 mr-1" />
                     {url.clicks} {url.clicks === 1 ? "click" : "clicks"}
                   </div>
-                  {url.expiresAt && (
+                  {url.expiresAt && formattedDates[url.slug]?.expires && (
                     <div className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      Expires: {format(new Date(url.expiresAt), "PP")}
+                      Expires: {formattedDates[url.slug].expires}
                     </div>
                   )}
                   {url.qrCode && (

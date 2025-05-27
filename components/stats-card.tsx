@@ -13,39 +13,36 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useDataContext } from "../providers/ContextProvider";
-
-const generateChartData = () => {
-  const data = [];
-  const now = new Date();
-
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(now.getDate() - i);
-
-    data.push({
-      date: date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      clicks: Math.floor(Math.random() * 25) + 5,
-    });
-  }
-
-  return data;
-};
+import { format } from "date-fns";
+import { ChartDataType } from "../interface/types";
 
 export function StatsCard() {
   const [totalUrls, setTotalUrls] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
   const [conversionRate, setConversionRate] = useState(0);
-  const [chartData, setChartData] = useState(generateChartData());
+  const [chartData, setChartData] = useState<ChartDataType[]>([]);
   const { userData } = useDataContext();
 
   useEffect(() => {
+    if (!userData.length) {
+      return;
+    }
     setTotalUrls(userData.length);
     const clicks = userData.reduce((total, url) => total + url.clicks, 0);
     setTotalClicks(clicks);
     setConversionRate(userData.length > 0 ? clicks / userData.length : 0);
+
+    const sortedData = [...userData].sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    const chartData: ChartDataType[] = sortedData.map((url) => ({
+      date: format(new Date(url.createdAt), "MMM d"),
+      clicks: url.clicks,
+    }));
+
+    setChartData(chartData);
   }, [userData]);
 
   return (

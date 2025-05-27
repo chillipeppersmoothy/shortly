@@ -31,3 +31,8 @@ export interface DataContextType {
   incrementClicks: (slug: string) => void;
   deleteData: (slug: string) => void;
 }
+
+export interface ChartDataType {
+  date: string;
+  clicks: number;
+}

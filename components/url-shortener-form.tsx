@@ -32,6 +32,8 @@ export function UrlShortenerForm() {
   const [isQrCode, setIsQrCode] = useState(false);
   const [isExpiration, setIsExpiration] = useState(false);
   const [expirationDate, setExpirationDate] = useState<Date>();
+  const [formattedExpirationDate, setFormattedExpirationDate] =
+    useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [slugError, setSlugError] = useState("");
@@ -53,6 +55,14 @@ export function UrlShortenerForm() {
       setCurrentUser(user.username);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (expirationDate) {
+      setFormattedExpirationDate(format(expirationDate, "PPP"));
+    } else {
+      setFormattedExpirationDate("");
+    }
+  }, [expirationDate]);
 
   useEffect(() => {
     if (isCustomSlug || isExpiration) {
@@ -148,6 +158,7 @@ export function UrlShortenerForm() {
       setIsQrCode(false);
       setIsExpiration(false);
       setExpirationDate(undefined);
+      setFormattedExpirationDate("");
       setError("");
       setSlugError("");
     } catch (err) {
@@ -288,13 +299,11 @@ export function UrlShortenerForm() {
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal",
-                          !expirationDate && "text-muted-foreground"
+                          !formattedExpirationDate && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {expirationDate
-                          ? format(expirationDate, "PPP")
-                          : "Select expiration date"}
+                        {formattedExpirationDate || "Select expiration date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
