@@ -1,11 +1,13 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { DataContextType, ShortenedURL } from "../interface/types";
+import { DataContextType, ShortenedURL, UserDetials } from "../interface/types";
 import { getUserUrls } from "../api/services";
 
 export const DataContext = createContext<DataContextType>({
   userData: [] as ShortenedURL[],
+  userDetails: {} as UserDetials,
+  updateUserDetails: () => {},
   getUserData: async () => {},
   updateUserData: () => {},
   incrementClicks: () => {},
@@ -14,6 +16,13 @@ export const DataContext = createContext<DataContextType>({
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [userData, setUserData] = useState<ShortenedURL[]>([]);
+  const [userDetails, setUserDetails] = useState<UserDetials>(
+    {} as UserDetials
+  );
+
+  const updateUserDetails = (data: UserDetials) => {
+    setUserDetails(data);
+  };
 
   const getUserData = async (user: string) => {
     const response = await getUserUrls(user);
@@ -40,6 +49,8 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     <DataContext.Provider
       value={{
         userData,
+        userDetails,
+        updateUserDetails,
         getUserData,
         updateUserData,
         incrementClicks,

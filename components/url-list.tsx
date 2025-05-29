@@ -37,11 +37,10 @@ import { format } from "date-fns";
 import { ShortenedURL } from "../interface/types";
 import { useDataContext } from "../providers/ContextProvider";
 import { deleteUrl, patchUrl } from "../api/services";
-import { useUser } from "@clerk/nextjs";
 import { API_URL } from "@/lib/env";
 
 export function UrlList() {
-  const { userData, getUserData, incrementClicks, deleteData } =
+  const { userData, userDetails, getUserData, incrementClicks, deleteData } =
     useDataContext();
   const [urls, setUrls] = useState<ShortenedURL[]>([]);
   const [refreshFlag, setRefreshFlag] = useState(0);
@@ -54,11 +53,10 @@ export function UrlList() {
     Record<string, { created: string; expires: string }>
   >({});
   const { toast } = useToast();
-  const { user, isLoaded } = useUser();
 
   useEffect(() => {
     getUser();
-  }, [refreshFlag, user, isLoaded]);
+  }, [refreshFlag, userDetails]);
 
   useEffect(() => {
     setUrls(userData);
@@ -74,10 +72,10 @@ export function UrlList() {
   }, [userData]);
 
   async function getUser() {
-    if (!isLoaded) return;
+    if (!userDetails.isLoaded) return;
 
-    if (user && user.username) {
-      await getUserData(user?.username);
+    if (userDetails && userDetails.username) {
+      await getUserData(userDetails.username);
     }
   }
 

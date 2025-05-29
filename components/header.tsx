@@ -11,9 +11,11 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import { useDataContext } from "../providers/ContextProvider";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const { userDetails } = useDataContext();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,7 +70,10 @@ export function Header() {
           </SignedOut>
           <Button asChild>
             <SignedIn>
-              <UserButton showName />
+              <div className="flex items-center gap-2">
+                <span className="text-primary">{userDetails.fullName}</span>
+                <UserButton />
+              </div>
             </SignedIn>
           </Button>
         </div>

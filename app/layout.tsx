@@ -13,6 +13,36 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Smal.ly - URL Shortener",
   description: "A modern URL shortener service with analytics",
+  icons: {
+    icon: ["/images/logo.webp"],
+  },
+  keywords: ["Url shortner", "url", "shortner", "smally", "bitly", "shortly"],
+  authors: [{ name: "Aditya Shenoy K" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://smal-ly.vercel.app",
+    title: "Smal.ly - URL Shortener",
+    description: "A modern URL shortener service with analytics",
+    siteName: "Aditya Shenoy K Portfolio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Smal.ly - URL Shortener",
+    description: "A modern URL shortener service with analytics",
+    images: ["/images/logo.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

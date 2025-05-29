@@ -22,7 +22,6 @@ import { postUrl } from "../api/services";
 import { useDataContext } from "../providers/ContextProvider";
 import { ShortenedURL } from "../interface/types";
 import { API_URL } from "@/lib/env";
-import { useUser } from "@clerk/nextjs";
 
 export function UrlShortenerForm() {
   const [url, setUrl] = useState("");
@@ -37,9 +36,8 @@ export function UrlShortenerForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [slugError, setSlugError] = useState("");
-  const { user, isSignedIn } = useUser();
   const { toast } = useToast();
-  const { updateUserData } = useDataContext();
+  const { updateUserData, userDetails } = useDataContext();
 
   const isValidUrl = (urlString: string) => {
     try {
@@ -51,10 +49,10 @@ export function UrlShortenerForm() {
   };
 
   useEffect(() => {
-    if (user && user.username) {
-      setCurrentUser(user.username);
+    if (userDetails && userDetails.username) {
+      setCurrentUser(userDetails.username);
     }
-  }, [user]);
+  }, [userDetails]);
 
   useEffect(() => {
     if (expirationDate) {
@@ -106,16 +104,6 @@ export function UrlShortenerForm() {
       return;
     }
 
-    if (isCustomSlug && customSlug.length > 8) {
-      setSlugError("Slug should be 8 characters or less");
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Slug should be 8 characters or less",
-      });
-      return;
-    }
-
     if (isExpiration && !expirationDate) {
       setSlugError("Please select an expiration date");
       toast({
@@ -126,7 +114,7 @@ export function UrlShortenerForm() {
       return;
     }
 
-    if (!isSignedIn) {
+    if (!userDetails.isSignedIn) {
       document.getElementById("trigger-sign-in")?.click();
       return;
     }
@@ -245,9 +233,10 @@ export function UrlShortenerForm() {
                     placeholder="your-custom-slug (Max 8 characters)"
                     value={customSlug}
                     onChange={(e) => setCustomSlug(e.target.value)}
+                    maxLength={8}
                   />
                   <div className="text-xs text-muted-foreground mt-3">
-                    Your URL will be: `${API_URL}`
+                    Your URL will be: {API_URL}/
                     {customSlug || "your-custom-slug"}
                   </div>
                   {slugError && (
@@ -311,7 +300,6 @@ export function UrlShortenerForm() {
                         mode="single"
                         selected={expirationDate}
                         onSelect={setExpirationDate}
-                        initialFocus
                         disabled={(date) => date < new Date()}
                       />
                     </PopoverContent>

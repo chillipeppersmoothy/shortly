@@ -17,15 +17,17 @@ export interface ShortURLResponse {
   expiresAt: Date | null;
 }
 
-export interface UrlResponse {
-  slug: string;
-  clicks: number;
-  expiresAt: Date | null;
-  qrCode: string;
+export interface UserDetials {
+  fullName: string;
+  username: string;
+  isLoaded: boolean;
+  isSignedIn: boolean;
 }
 
 export interface DataContextType {
   userData: ShortenedURL[];
+  userDetails: UserDetials;
+  updateUserDetails: (data: UserDetials) => void;
   getUserData: (user: string) => Promise<void>;
   updateUserData: (data: ShortenedURL) => void;
   incrementClicks: (slug: string) => void;

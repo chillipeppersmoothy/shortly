@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LinkIcon } from "lucide-react";
 
@@ -20,36 +17,18 @@ export function HeroSection() {
       <div className="absolute bottom-[-5%] left-[10%] w-[30%] h-[30%] bg-chart-2/5 rounded-full filter blur-3xl" />
 
       <div className="mx-auto max-w-3xl text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-chart-2">
-            Simplify your links
-          </h1>
-        </motion.div>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-6xl sm:min-h-[80px] bg-clip-text text-transparent bg-gradient-to-r from-primary to-chart-2">
+          Simplify your links
+        </h1>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Create short, memorable links that redirect to your long URLs. Track
-            clicks, generate QR codes, and manage all your links in one place.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6"
-        >
+        <p className="mt-6 text-lg leading-8 text-muted-foreground">
+          Create short, memorable links that redirect to your long URLs. Track
+          clicks, generate QR codes, and manage all your links in one place.
+        </p>
+        <div className="mt-8 flex justify-center gap-4">
           <Button
             size="lg"
-            className="px-8 py-6 text-lg gap-2"
+            className="px-8 py-6 text-lg"
             onClick={() => handleNavClick("api")}
           >
             <LinkIcon className="h-5 w-5" />
@@ -63,7 +42,7 @@ export function HeroSection() {
           >
             Learn More
           </Button>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

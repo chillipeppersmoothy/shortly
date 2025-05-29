@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Link2, MousePointerClick, TrendingUp } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -12,37 +10,43 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useDataContext } from "../providers/ContextProvider";
 import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3, Link2, MousePointerClick, TrendingUp } from "lucide-react";
+import { useDataContext } from "../providers/ContextProvider";
 import { ChartDataType } from "../interface/types";
 
 export function StatsCard() {
+  const { userData } = useDataContext();
+
   const [totalUrls, setTotalUrls] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
   const [conversionRate, setConversionRate] = useState(0);
   const [chartData, setChartData] = useState<ChartDataType[]>([]);
-  const { userData } = useDataContext();
 
   useEffect(() => {
-    if (!userData.length) {
-      return;
-    }
-    setTotalUrls(userData.length);
-    const clicks = userData.reduce((total, url) => total + url.clicks, 0);
+    if (!userData || !userData.length) return;
+
+    const total = userData.length;
+    const clicks = userData.reduce((sum, url) => sum + url.clicks, 0);
+
+    setTotalUrls(total);
     setTotalClicks(clicks);
-    setConversionRate(userData.length > 0 ? clicks / userData.length : 0);
+    setConversionRate(total ? clicks / total : 0);
 
     const sortedData = [...userData].sort(
       (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    const chartData: ChartDataType[] = sortedData.map((url) => ({
-      date: format(new Date(url.createdAt), "MMM d"),
-      clicks: url.clicks,
+    const chartDataFormatted: ChartDataType[] = sortedData.map((item) => ({
+      date: format(new Date(item.createdAt), "MMM d"),
+      clicks: item.clicks,
     }));
 
-    setChartData(chartData);
+    console.log("Formatted chart data:", chartDataFormatted);
+
+    setChartData(chartDataFormatted);
   }, [userData]);
 
   return (
@@ -53,6 +57,7 @@ export function StatsCard() {
           Link Analytics
         </CardTitle>
       </CardHeader>
+
       <CardContent className="pt-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
           <div className="flex items-center gap-2">
@@ -64,7 +69,6 @@ export function StatsCard() {
               <p className="text-2xl font-bold">{totalUrls}</p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
             <div className="bg-chart-1/20 dark:bg-chart-1/10 p-2 rounded-full">
               <MousePointerClick className="h-5 w-5 text-chart-1" />
@@ -74,7 +78,6 @@ export function StatsCard() {
               <p className="text-2xl font-bold">{totalClicks}</p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
             <div className="bg-chart-2/20 dark:bg-chart-2/10 p-2 rounded-full">
               <TrendingUp className="h-5 w-5 text-chart-2" />
@@ -85,8 +88,7 @@ export function StatsCard() {
             </div>
           </div>
         </div>
-
-        <div className="h-[200px] w-full mt-4">
+        <div className="h-[300px] w-full mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}

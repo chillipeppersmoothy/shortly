@@ -26,7 +26,7 @@ export function CopyButton({
   const [hasCopied, setHasCopied] = useState(false);
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(API_URL + value);
+    await navigator.clipboard.writeText(API_URL + "/" + value);
     setHasCopied(true);
     setTimeout(() => setHasCopied(false), 2000);
   };
