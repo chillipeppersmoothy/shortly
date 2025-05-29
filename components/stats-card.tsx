@@ -44,8 +44,6 @@ export function StatsCard() {
       clicks: item.clicks,
     }));
 
-    console.log("Formatted chart data:", chartDataFormatted);
-
     setChartData(chartDataFormatted);
   }, [userData]);
 
