@@ -21,10 +21,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://smal-ly.vercel.app",
+    url: "https://smally-by-aditya-shenoy-k.vercel.app",
     title: "Smal.ly - URL Shortener",
     description: "A modern URL shortener service with analytics",
-    siteName: "Aditya Shenoy K Portfolio",
+    siteName: "Smal.ly - URL Shortener",
   },
   twitter: {
     card: "summary_large_image",
