@@ -7,8 +7,12 @@ import { DataProvider } from "../providers/ContextProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadesOfPurple } from "@clerk/themes";
 import { PUBLISHABLE_KEY } from "@/lib/env";
+import { Toaster } from "../components/ui/toaster";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Smal.ly - URL Shortener",
@@ -57,6 +61,10 @@ export default function RootLayout({
       afterSignOutUrl="/"
     >
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta name="theme-color" content="#000000" />
+        </head>
         <body className={inter.className}>
           <ThemeProvider
             attribute="class"
@@ -65,9 +73,17 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <DataProvider>
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background"
+              >
+                Skip to main content
+              </a>
               <Header />
-
-              <main>{children}</main>
+              <main id="main-content" tabIndex={-1}>
+                {children}
+                <Toaster />
+              </main>
             </DataProvider>
           </ThemeProvider>
         </body>

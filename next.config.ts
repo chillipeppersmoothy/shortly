@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
-const nextConfig: NextConfig = {
+const config: NextConfig = {
   turbopack: {
     rules: {
       "*.svg": {
@@ -9,6 +10,14 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
 };
 
-export default nextConfig;
+export default withBundleAnalyzer({
+  enabled: true,
+})(config);

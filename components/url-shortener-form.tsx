@@ -136,6 +136,7 @@ export function UrlShortenerForm() {
       updateUserData({ ...urlData, slug: response.slug, qrCode: response.qr });
 
       toast({
+        variant: "success",
         title: "Success",
         description: "URL shortened successfully!",
       });
@@ -163,11 +164,17 @@ export function UrlShortenerForm() {
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto backdrop-blur-sm bg-card/95 mt-24">
+    <Card
+      className="w-full max-w-3xl mx-auto backdrop-blur-sm bg-card/95 mt-24"
+      role="region"
+      aria-label="URL Shortener Form"
+    >
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold">Shorten your URL</h2>
+            <h2 className="text-2xl font-bold" id="form-heading">
+              Shorten your URL
+            </h2>
             <p className="text-muted-foreground">
               Paste your long URL below to create a short link
             </p>
@@ -175,15 +182,25 @@ export function UrlShortenerForm() {
 
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
+              <Label htmlFor="url-input" className="sr-only">
+                Enter URL to shorten
+              </Label>
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <LinkIcon className="w-5 h-5 text-muted-foreground" />
+                <LinkIcon
+                  className="w-5 h-5 text-muted-foreground"
+                  aria-hidden="true"
+                />
               </div>
               <Input
                 type="url"
+                id="url-input"
                 placeholder="https://example.com/very/long/url/that/needs/shortening"
                 className="pl-10"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
+                aria-invalid={!!error}
+                aria-describedby={error ? "url-error" : undefined}
+                required
               />
             </div>
 
@@ -191,22 +208,34 @@ export function UrlShortenerForm() {
               type="submit"
               className="min-w-[100px] transition-all duration-300"
               disabled={isSubmitting}
+              aria-busy={isSubmitting}
             >
               {isSubmitting ? (
                 <span className="animate-pulse">Processing...</span>
               ) : (
                 <>
-                  <Wand2Icon className="mr-2 h-4 w-4" />
+                  <Wand2Icon className="mr-2 h-4 w-4" aria-hidden="true" />
                   Shorten
                 </>
               )}
             </Button>
           </div>
 
-          {error && <div className="text-destructive text-sm">{error}</div>}
+          {error && (
+            <div
+              className="text-destructive text-sm"
+              id="url-error"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
 
           <Tabs defaultValue="options" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList
+              className="grid w-full grid-cols-3"
+              aria-label="URL shortener options"
+            >
               <TabsTrigger value="options">Options</TabsTrigger>
               <TabsTrigger value="customization">Customization</TabsTrigger>
               <TabsTrigger value="advanced">Advanced</TabsTrigger>
@@ -216,7 +245,10 @@ export function UrlShortenerForm() {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="custom-slug">Custom slug</Label>
-                  <div className="text-sm text-muted-foreground">
+                  <div
+                    className="text-sm text-muted-foreground"
+                    id="custom-slug-description"
+                  >
                     Create a memorable short link
                   </div>
                 </div>
@@ -224,23 +256,39 @@ export function UrlShortenerForm() {
                   id="custom-slug"
                   checked={isCustomSlug}
                   onCheckedChange={setIsCustomSlug}
+                  aria-describedby="custom-slug-description"
                 />
               </div>
 
               {isCustomSlug && (
                 <div className="pt-2">
+                  <Label htmlFor="slug-input" className="sr-only">
+                    Enter custom slug
+                  </Label>
                   <Input
+                    id="slug-input"
                     placeholder="your-custom-slug (Max 8 characters)"
                     value={customSlug}
                     onChange={(e) => setCustomSlug(e.target.value)}
                     maxLength={8}
+                    aria-invalid={!!slugError}
+                    aria-describedby={slugError ? "slug-error" : "slug-preview"}
                   />
-                  <div className="text-xs text-muted-foreground mt-3">
+                  <div
+                    className="text-xs text-muted-foreground mt-3"
+                    id="slug-preview"
+                  >
                     Your URL will be: {API_URL}/
                     {customSlug || "your-custom-slug"}
                   </div>
                   {slugError && (
-                    <div className="text-destructive text-sm">{slugError}</div>
+                    <div
+                      className="text-destructive text-sm"
+                      id="slug-error"
+                      role="alert"
+                    >
+                      {slugError}
+                    </div>
                   )}
                 </div>
               )}
@@ -305,7 +353,13 @@ export function UrlShortenerForm() {
                     </PopoverContent>
                   </Popover>
                   {slugError && (
-                    <div className="text-destructive text-sm">{slugError}</div>
+                    <div
+                      className="text-destructive text-sm"
+                      id="slug-error"
+                      role="alert"
+                    >
+                      {slugError}
+                    </div>
                   )}
                 </div>
               )}

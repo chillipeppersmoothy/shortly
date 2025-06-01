@@ -85,6 +85,7 @@ export function UrlList() {
     setRefreshFlag((prev) => prev + 1);
     window.open(`${API_URL}/${url.slug}`, "_blank");
     toast({
+      variant: "success",
       title: "Success",
       description: "Opening URL in new tab",
     });
@@ -109,6 +110,7 @@ export function UrlList() {
           setDeleteDialogOpen(false);
           setUrlToDelete(null);
           toast({
+            variant: "success",
             title: "Success",
             description: "URL deleted successfully",
           });
@@ -133,6 +135,7 @@ export function UrlList() {
           url,
         });
         toast({
+          variant: "success",
           title: "Success",
           description: "URL shared successfully",
         });
@@ -147,6 +150,7 @@ export function UrlList() {
     } else {
       navigator.clipboard.writeText(url);
       toast({
+        variant: "success",
         title: "Success",
         description: "URL copied to clipboard",
       });
@@ -199,7 +203,9 @@ export function UrlList() {
                       onClick={() => handleOpenUrl(url)}
                       title={url.slug}
                     >
-                      {url.url}
+                      {url.url.length > 70
+                        ? url.url.slice(0, 70) + "..."
+                        : url.url}
                     </span>
                   </div>
                 </div>
